@@ -114,14 +114,7 @@ class Lexer {
                     }
                 }
                 case NUMBER_HEX, NUMBER_OCT, NUMBER_BIN -> {
-                    String numStr = switch (state) {
-                        case NUMBER_HEX -> NUM_HEX;
-                        case NUMBER_OCT -> NUM_OCT;
-                        case NUMBER_BIN -> NUM_BIN;
-                        // unreachable
-                        default -> throw new SyntaxError("Invalid or unexpected token");
-                    };
-                    if (numStr.indexOf(c) >= 0) {
+                    if (state.numberChars.indexOf(c) >= 0) {
                         current.append(c);
                     } else if (WHITESPACE.indexOf(c) >= 0) {
                         tokens.add(current.toString());
@@ -182,9 +175,20 @@ class Lexer {
 
     private enum State {
         NONE,
-        NUMBER, NUMBER_EXP, NUMBER_HEX, NUMBER_OCT, NUMBER_BIN,
+        NUMBER, NUMBER_EXP,
+        NUMBER_HEX(NUM_HEX), NUMBER_OCT(NUM_OCT), NUMBER_BIN(NUM_BIN),
         EXPRESSION,
-        STRING
+        STRING;
+
+        private final String numberChars;
+
+        State() {
+            this.numberChars = "";
+        }
+
+        State(String numberChars) {
+            this.numberChars = numberChars;
+        }
     }
 
     public static class SyntaxError extends RuntimeException {
